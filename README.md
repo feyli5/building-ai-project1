@@ -1,11 +1,7 @@
 # My Kitchen Freshness Tracker (Building AI Final Project)
 
-This is my final milestone project for the Building AI course. I decided to make a simple app concept to solve a problem I deal with every single week in my own kitchen: throwing away food that got forgotten in the back of the fridge.
-
----
-
-### 1. What my project does
-My idea is called **Smart Shelf Life**. It is a straightforward mobile app concept where you take a quick photo of your groceries before putting them away. The app recognizes what the food is, estimates how many days it has left before spoiling, and sends a notification to your phone so you remember to cook it in time.
+## Summary
+This is my final milestone project for the Building AI course. I decided to make a simple app concept called **Smart Shelf Life** to solve a problem I deal with every single week in my own kitchen: throwing away food that got forgotten in the back of the fridge. It is a straightforward mobile app concept where you take a quick photo of your groceries before putting them away. The app recognizes what the food is, estimates how many days it has left before spoiling, and sends a notification to your phone so you remember to cook it in time.
 
 ---
 
