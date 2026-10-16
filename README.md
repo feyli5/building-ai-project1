@@ -1,71 +1,104 @@
-# My Kitchen Freshness Tracker (Building AI Final Project)
+# 🍏 Smart Shelf Life: AI Freshness Tracker & Annotation Pipeline
 
 ## Summary
-This is my final milestone project for the Building AI course. I decided to make a simple app concept called **Smart Shelf Life** to solve a problem I deal with every single week in my own kitchen: throwing away food that got forgotten in the back of the fridge. It is a straightforward mobile app concept where you take a quick photo of your groceries before putting them away. The app recognizes what the food is, estimates how many days it has left before spoiling, and sends a notification to your phone so you remember to cook it in time.
+This is my final milestone project for the Building AI course. I designed an application concept called **Smart Shelf Life** to tackle household food waste. The system uses computer vision to track the freshness of groceries over time. To train the image recognition engine, the app processes raw bounding-box image annotations to identify distinct food items and evaluate surface degradation levels.
 
 ---
 
 ### 2. Why I wanted to build this
-* **The Problem:** Like most people, I buy fresh fruits and veggies with good intentions, but they get buried behind other containers and go bad. It feels like a massive waste of money, and it is terrible for the environment when organic waste goes straight to a landfill.
-* **How often it happens:** This happens to me and my friends almost every week. 
-* **My Motivation:** I wanted to use basic AI concepts to handle the tracking for me so I don't have to constantly check expiration labels or open every drawer manually.
+* **The Problem:** Households discard edible food daily simply because items get lost or forgotten in the back of the refrigerator drawers.
+* **Frequency:** This is a recurring issue across millions of homes, leading to waste of money and increased greenhouse gas emissions in landfills.
+* **My Motivation:** Working with AI data pipelines, I wanted to apply object tracking logic to automate grocery inventory tracking so users get smart alerts before their food spoils.
 
 ---
 
-### 3. The AI parts and my code setup
-To make this work, the system needs two steps:
-1. **Recognizing the food item:** A standard image classification model (like a Convolutional Neural Network or CNN) to look at a photo and say "this is a banana" or "this is a carton of milk".
-2. **Predicting the expiration date:** A basic regression setup that calculates a freshness score based on the storage type and how many days have passed.
-
-I wrote a quick Python simulation to show how the freshness tracking logic works behind the scenes. It uses basic decay math based on where you store the item:
+### 3. The Annotation & ML Pipeline (Python Prototype)
+To train this AI model, the system must process object labels from an annotation platform (like Label Studio). Below is a Python script that prototypes this workflow. It loads an annotation record, extracts the item class, and runs an exponential decay algorithm to determine the freshness index.
 
 ```python
-# Simple Python simulation for my app's backend logic
+"""
+Smart Shelf Life - Food Dataset Annotation Parsing Prototype
+Author: Okpe Levi Chinedu
+"""
 import math
+import json
 
-def check_my_groceries(days_in_kitchen, storage_place):
-    # Pantry decays faster than the fridge
-    if storage_place == "pantry":
-        decay_rate = 0.15
-    elif storage_place == "fridge":
-        decay_rate = 0.05
-    else:
-        decay_rate = 0.02 # for freezer items
-        
-    # Standard formula to drop the percentage over time
-    current_freshness = math.exp(-decay_rate * days_in_kitchen) * 100
+# Simulated output JSON exported from an annotation platform like Label Studio
+sample_annotation_data = """
+{
+    "image_id": "IMG_20261016_001.jpg",
+    "annotations": [
+        {"class": "apple", "bbox":, "storage_days": 6, "condition": "surface_spots"},
+        {"class": "banana", "bbox":, "storage_days": 3, "condition": "good"}
+    ]
+}
+"""
+
+def parse_pipeline_data(json_input, storage_type="fridge"):
+    """
+    Parses labeled dataset items and scores real-time expiration metrics.
+    Storage environment modifiers: fridge = 0.04 decay rate, pantry = 0.12 decay rate.
+    """
+    data = json.loads(json_input)
+    decay_rate = 0.04 if storage_type == "fridge" else 0.12
+    processed_items = []
     
-    # Rounding it to make it clean for the user screen
-    return round(current_freshness, 1)
+    print(f"--- Processing Batch Image: {data['image_id']} ---")
+    
+    for item in data['annotations']:
+        days = item['storage_days']
+        
+        # Core mathematical decay calculation 
+        freshness_pct = math.exp(-decay_rate * days) * 100
+        rounded_freshness = round(freshness_pct, 1)
+        
+        status = "CRITICAL: Cook Immediately" if rounded_freshness < 65 else "Healthy"
+        
+        print(f"Detected Label: [{item['class'].upper()}] | BBox coordinates: {item['bbox']}")
+        print(f" > Days Stored: {days} days | Est. Freshness: {rounded_freshness}% | Status: {status}\n")
+        
+        processed_items.append({"item": item['class'], "freshness": rounded_freshness})
+        
+    return processed_items
 
-# Testing my function to see if a tomato lasts 4 days in the pantry
-print("Freshness left:")
-print(check_my_groceries(4, "pantry"))
+# Run the simulation pipeline
+parse_pipeline_data(sample_annotation_data, storage_type="pantry")
 ```
 
 ---
 
-### 4. How a normal user uses it
-* **Step 1:** You unpack your grocery bags and snap a single photo of your items.
-* **Step 2:** The app registers the items and starts a countdown clock.
-* **Step 3:** When a specific item drops below 25% freshness, you get an alert on your phone along with a couple of quick recipe ideas that use that exact ingredient.
-
-Here is a quick concept photo of the fresh inventory setup:
-![App Layout Concept](https://unsplash.com)
-
----
-
-### 5. Main difficulties and challenges
-* **Opaque Packaging:** If something is inside a cardboard box or a thick plastic container, a camera cannot see inside to check if the food is actually molding or stale. 
-* **Temperature changes:** Fridges are set to different temperatures in every home, which means my fixed decay rates will need constant fine-tuning based on user settings.
+### 4. How to Run and Test
+If you want to run the python prototype locally on your computer:
+1. Clone this repository or copy the code script into a local file named `pipeline.py`.
+2. Open your terminal or command prompt and run:
+   ```bash
+   python pipeline.py
+   ```
+3. The script will output parsed classification results, bounding-box coordinate maps, and freshness tracking alerts directly to your terminal.
 
 ---
 
-### 6. Next steps for my project
-I want to expand this idea by finding a way to link the app directly to digital grocery store receipts or store loyalty cards. That way, you wouldn't even have to take photos—your items would automatically load into your virtual fridge list the moment you pay at the checkout counter.
+### 5. Application Workflow
+* **Step 1:** The user takes a smartphone picture of their grocery haul.
+* **Step 2:** The pipeline processes coordinates to isolate each food item inside the frame.
+* **Step 3:** The app tracks the time elapsed and prompts the user with recipe recommendations when freshness scores drop under 30%.
+
+Here is a visual example of the inventory environment:
+![Groceries Layout Example](https://unsplash.com)
 
 ---
 
-### 7. Credits
-* This project was designed for the final section of the **Building AI course** organized by the University of Helsinki and MinnaLearn.
-* The code simulation uses basic math principles covered in the regression modules of the course.
+### 6. System Challenges
+* **Occlusions:** When groceries are stacked or packed behind opaque boxes, the object detection model cannot see surface metrics to measure aging.
+* **Ambient Variations:** Refrigerator settings fluctuate across different homes, which means static decay coefficients need adjustment based on localized user environments.
+
+---
+
+### 7. Next Steps & Future Plans
+I intend to explore linking this annotation stream directly to point-of-sale receipt databases so that text data from digital receipts can automatically generate bounding box regions for incoming grocery lists.
+
+---
+
+### 8. Credits
+* Built for the **Building AI course milestone project** (University of Helsinki / MinnaLearn).
+* Implemented using data validation structures common in data label workflows.
