@@ -54,8 +54,8 @@ print(check_my_groceries(4, "pantry"))
 * **Step 2:** The app registers the items and starts a countdown clock.
 * **Step 3:** When a specific item drops below 25% freshness, you get an alert on your phone along with a couple of quick recipe ideas that use that exact ingredient.
 
-Here is a quick placeholder layout of how I want the notification alert stream to look:
-![App Layout Concept](https://tinyurl.com)
+Here is a quick concept photo of the fresh inventory setup:
+![App Layout Concept](https://unsplash.com)
 
 ---
 
